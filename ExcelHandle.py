@@ -1,5 +1,6 @@
 from tkinter import filedialog
 import openpyxl
+import re
 
 
 class ExcelHandle():
@@ -20,34 +21,55 @@ class ExcelHandle():
 
     def getExcel(self):
         ExcelBooks = list()
-        ExcelBooks.append(self.ExcelOpen('単体試験シート'))
-        ExcelBooks.append(self.ExcelOpen('(仮)養生シリアル一覧シート'))
-        ExcelBooks.append(self.ExcelOpen('(仮)シリアルホスト名一覧シート'))
+        ExcelBooks.append(self.ExcelOpen('シート名を変更したいExcelファイル'))
+
+        ExcelBooks.append(self.ExcelOpen('養生番号とシリアルが並んだExcelファイル'))
+
+        ExcelBooks.append(self.ExcelOpen('シリアルとホスト名が記載されているExcelファイル'))
+
         # print(type(ExcelBooks[0]))
         # print(type(ExcelBooks[1]))
         # print(type(ExcelBooks[2]))
         return ExcelBooks
 
-    def getBasepoint(self, SheetNames):
-        print('項番\tシート名\n')
-        tmpIndex = -1
-        for tmpNames in SheetNames:
-            tmpIndex += 1
-            print(str(tmpIndex) + '\t' + str(tmpNames))
-
-        return int(input('項番を入力-> '))
-
     def SplitCellAddress(self, CellAddress):
-        tmp = list(CellAddress)
-        column = tmp[0]  # アルファベットの方、列
-        row = int(tmp[1])  # 数字の方、行
+        column = re.split('[0-9]+', CellAddress)
+        row = re.split('[a-z][A-Z]+', CellAddress)  # 数字の方、行 ここができてないよ
         return column, row
 
-    '''
-    def getSerial(self, target, SerialsSheet):
-        Ycolumn, Yrow = self.SplitCellAddress(input('養生番号が一覧されている最初のセル番地を入力してください。ex)A3 -> '))
-        Scolumn, Srow = self.SplitCellAddress(input('シリアルが一覧されている最初のセル番地を入力してください。 ex)B3 -> '))
-        while 1:
-            if target == SerialsSheet[str(Ycolumn) + str(Yrow)] :
-                # 養生番号の発見
-    '''
+    def SearchFromBook(self, workbook, targetstr):
+        detectflag = False
+        duplicateflag = False
+        returnlist = []
+
+        print('ブック全体から検索します。')
+
+        for ws in workbook.worksheets:  # ブック内の全シートを回るループ
+            print(ws.title + 'を検索します。')
+            for row in ws.iter_rows():  # シート内の全行を回るループ
+                for cell in row:  # 行内の全セルを回るループ
+                    if cell.value is None:
+                        continue  # ここら辺の比較の時にStrがどうのこうの出る。
+                    else:
+                        # ここから重複検索をしますが、処理が大幅に遅くなる可能性があるので、場合によって重複検索しないほうに帰る必要がある
+                        if str(targetstr) in str(cell.value):
+                            if detectflag:
+                                duplicateflag = True
+                            else:
+                                detectflag = True
+
+                            returnlist.append(ws.title)
+                            returnlist.append(cell.row)
+
+        if detectflag:
+            # 発見時処理
+            if duplicateflag:
+                # 重複時処理
+                print('検索結果が複数検出されました。\n重複しています。')
+                return returnlist
+            else:
+                return returnlist
+        else:
+            # 未発見時処理
+            print('データが見つかりませんでした。')
+            return None
