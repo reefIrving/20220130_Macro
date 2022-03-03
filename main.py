@@ -40,13 +40,12 @@ def main():
                     print('ヒットしました。\n シート名を変更します。')
 
                     tmpwb1 = ExcelBooks[2]
-                    tmpws1 = tmpwb1[SearchResult[0]]
+                    tmpws1 = tmpwb1[SearchResult[0]]  # 検索結果から、一致するシート
                     tmpwb2 = ExcelBooks[1]
                     tmpws2 = tmpwb2.worksheets[0]
-                    tmpwb3 = ExcelBooks[0]
-
+                    tmpwb3 = ExcelBooks[0]  # シート名を変更する対象のブック
                     tmpws3 = tmpwb3[str(tmpws2.cell(
-                        row=val.row, column=int(yojocolumns)).value)]
+                        row=val.row, column=int(yojocolumns)).value)]  # シート名を変更する為に、対象シートをシート名から取得する
 
                     # print(tmpws1.cell(row=SearchResult[1],
                     #     column=int(hostcolumns)).value)

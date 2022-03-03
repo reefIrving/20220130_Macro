@@ -34,7 +34,8 @@ class ExcelHandle():
 
     def SplitCellAddress(self, CellAddress):
         column = re.split('[0-9]+', CellAddress)
-        row = re.split('[a-z][A-Z]+', CellAddress)  # 数字の方、行 ここができてないよ
+        # 数字の方、行 ここができてないよ 全部くぎっちゃってる、1ケタだけにしてあるみたい
+        row = re.split('[a-z][A-Z]+', CellAddress)
         return column, row
 
     def SearchFromBook(self, workbook, targetstr):
